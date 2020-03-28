@@ -1,5 +1,6 @@
 from itertools import permutations
 
+
 def get_seat_perms(num_seats, num_starting_matches, num_maximum_allowed_matches):
     """Finds all of the seat permutations that match the given parameters.
 
@@ -27,6 +28,7 @@ def get_seat_perms(num_seats, num_starting_matches, num_maximum_allowed_matches)
 
     return successes
 
+
 def get_seat_perms_as_lists(seat_perms, num_starting_matches):
     '''Changes the list of permutation tuples to a list of lists.
 
@@ -48,6 +50,7 @@ def get_seat_perms_as_lists(seat_perms, num_starting_matches):
             perms_as_list.insert(i, i + 1)
         seat_perms_as_lists.append(perms_as_list)
     return seat_perms_as_lists
+
 
 def get_seat_perms_x_match(placement, seat_perms_as_lists, num_starting_matches):
     '''Filter out permutations from seat_perms_as_lists that start with num_starting_matches match(es).
@@ -74,6 +77,7 @@ def get_seat_perms_x_match(placement, seat_perms_as_lists, num_starting_matches)
         if matching == num_starting_matches:
             seat_perms_x_match.append(perm_list)
     return seat_perms_x_match
+
 
 def get_successes(placement, seat_perms_x_match, num_maximum_allowed_matches):
     '''Gets the number of successes after rotations
@@ -112,17 +116,18 @@ def get_successes(placement, seat_perms_x_match, num_maximum_allowed_matches):
             successes.append(list_to_check)
     return successes
 
-def print_perms(seat_perms, num_to_print = None):
+
+def print_perms(seat_perms, num_maximum_allowed_matches, num_to_print):
     '''Prints num_to_print number of seat_perms permutations.
 
     Parameters
     ----------
     seat_perms : List<List<int>>
-        All of the permutations that were found to be successful for the orientation
+        All of the permutations that were found to be successful for the orientation.
     number_to_print: int
-        Number of permutations to print on screen
+        The number of permutations to print on screen.
     '''
-    if num_to_print == None or num_to_print > len(seat_perms):
+    if num_to_print > len(seat_perms):
         num_to_print = len(seat_perms)
 
     print()
@@ -131,28 +136,80 @@ def print_perms(seat_perms, num_to_print = None):
         placement = list(range(1, len(seat_perms[0]) + 1))
         print(f"{placement}")
         print()
-        print("Permutations")
+        print(f"First (or all available, if more were requested) {num_to_print} permutations with "
+              f"{num_maximum_allowed_matches} or less matches in all rotations")
         for i in range(num_to_print):
             print(seat_perms[i])
     else:
         print("No permutations exist for those conditions!")
 
 
+def validate_user_input(val, extra_check):
+    '''Validates user input is an int and is less than extra_check.
+
+    Returns
+    -------
+    bool
+
+    Parameters
+    ----------
+    val : string
+        The value being sent to see if it will parse to an integer.
+    extra_check: int
+        An extra limitation (integer) for the parsed value to be less than or equal to.
+    '''
+    try:
+        val = int(val)
+        if val <= 0:
+            return False
+        if extra_check == None:
+            return True;
+        else:
+            if val <= extra_check:
+                return True
+            else:
+                return False
+    except:
+        return False
+
+
+def get_user_input(msg, extra_check):
+    '''Gets user input to use for the parameters of the main function.
+
+    Returns
+    -------
+    user_input : int
+
+    Parameters
+    ----------
+    msg : string
+        The display message for the user based on the value being requested.
+    extra_check: int
+        An extra limitation (integer) for the parsed value to be less than or equal to.
+    '''
+    valid = False
+    while not valid:
+        print(msg, end = ": ")
+        user_input = input()
+        valid = validate_user_input(user_input, extra_check)
+        if not valid:
+            if extra_check == None:
+                print("Invalid input. Please enter a positive integer.")
+            else:
+                print(f"Invalid input. Please enter a positive integer less than or equal to {extra_check}")
+    return int(user_input)
+
+
 def main():
 
-    num_seats = 7
-    num_starting_matches = 1
-    num_maximum_allowed_matches = 1
-    maximum_num_perms_to_print = 3
-
-    #TODO: Add user entry and validation for what the user enters. Can use the same validation for checking if ints
-    #      Starting matches must be <= number of seats
-    #      Allowed matches must <= number of starting matches
-    #      All numbers must be ints
-    #      Limit number of seats to something reasonable like 500 so computer can't crash
+    num_seats = get_user_input("Enter the number of seats", None)
+    num_starting_matches = get_user_input("Enter the number of starting matches", num_seats)
+    num_maximum_allowed_matches = get_user_input("Enter the maximum number of allowed matches via rotation", num_seats)
+    maximum_num_perms_to_print = get_user_input("Enter the maximum number of results to display", None)
 
     seat_perms = get_seat_perms(num_seats, num_starting_matches, num_maximum_allowed_matches)
-    print_perms(seat_perms, maximum_num_perms_to_print)
+    print_perms(seat_perms, num_maximum_allowed_matches, maximum_num_perms_to_print)
+
 
 if __name__ == "__main__":
     main()
