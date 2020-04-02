@@ -1,8 +1,8 @@
 from itertools import permutations
 
 
-def get_seat_perms(num_seats, num_starting_matches, num_maximum_allowed_matches):
-    """Finds all of the seat permutations that match the given parameters.
+def get_seat_perms(num_seats, num_starting_matches, num_matches_for_funded):
+    '''Finds all of the seat permutations that match the given parameters.
 
     Returns
     -------
@@ -14,17 +14,14 @@ def get_seat_perms(num_seats, num_starting_matches, num_maximum_allowed_matches)
         Number of seats at the table.
     num_starting_matches: int
         Number of people who sit down in the correct seat at the very beginning.
-    num_maximum_allowed_matches: int
-        Number of maximum allowable matches to check
-        (e.g. 7 people, 1 person sits at the correct seat, if we want orientations that cannot have more than 1 person
-        sitting in the correct seat no matter how the table is rotated after initial seating, then maximum allowable
-        matches would be 1).
-    """
+    num_matches_for_funded: int
+        Number of matches required to be funded.
+    '''
     placement = list(range(1, num_seats + 1))
-    seat_perms = list(permutations(range(num_starting_matches + 1, num_seats + 1)))
-    seat_perms_as_lists = get_seat_perms_as_lists(seat_perms, num_starting_matches)
+    unlocked_seat_perms = list(permutations(range(num_starting_matches + 1, num_seats + 1)))
+    seat_perms_as_lists = get_seat_perms_as_lists(unlocked_seat_perms, num_starting_matches)
     seat_perms_x_match = get_seat_perms_x_match(placement, seat_perms_as_lists, num_starting_matches)
-    successes = get_successes(placement, seat_perms_x_match, num_maximum_allowed_matches)
+    successes = get_successes(placement, seat_perms_x_match, num_matches_for_funded)
 
     return successes
 
@@ -79,12 +76,12 @@ def get_seat_perms_x_match(placement, seat_perms_as_lists, num_starting_matches)
     return seat_perms_x_match
 
 
-def get_successes(placement, seat_perms_x_match, num_maximum_allowed_matches):
+def get_successes(placement, seat_perms_x_match, num_matches_for_funded):
     '''Gets the number of successes after rotations
 
     Checks all rotations of the lists of interest to see if all rotations result in a match count lower than the
-    num_maximum_allowed_matches.  This can be better than checking if any match counts are greater than the
-    num_maximum_allowed_matches for diagnostic reasons, but is slower than using the any match check.
+    num_matches_for_funded.  This can be better than checking if any match counts are greater than the
+    num_matches_for_funded for diagnostic reasons, but is slower than using the any match check.
 
     Returns
     -------
@@ -96,11 +93,8 @@ def get_successes(placement, seat_perms_x_match, num_maximum_allowed_matches):
         List of numbers from 1 to num_seats that represent the packages on the table.
     seat_perms_x_match : List<List<int>>
         All permutations of placements where starting matches equals num_starting_matches.
-    num_maximum_allowed_matches: int
-        Number of maximum allowable matches to check
-        (e.g. 7 people, 1 person sits at the correct seat, if we want orientations that cannot have more than 1 person
-        sitting in the correct seat no matter how the table is rotated after initial seating, then maximum allowable
-        matches would be 1).
+    num_matches_for_funded: int
+        Number of matches required to be funded.
     '''
     successes = list()
     for list_to_check in seat_perms_x_match:
@@ -112,12 +106,12 @@ def get_successes(placement, seat_perms_x_match, num_maximum_allowed_matches):
                 if rotated_list[k] == placement[k]:
                     matching += 1
             matching_amount_list.append(matching)
-        if all(i <= num_maximum_allowed_matches for i in matching_amount_list):
+        if all(i < num_matches_for_funded for i in matching_amount_list):
             successes.append(list_to_check)
     return successes
 
 
-def print_perms(seat_perms, num_maximum_allowed_matches, num_to_print):
+def print_perms(seat_perms, num_matches_for_funded, num_to_print):
     '''Prints num_to_print number of seat_perms permutations.
 
     Parameters
@@ -137,11 +131,11 @@ def print_perms(seat_perms, num_maximum_allowed_matches, num_to_print):
         print(f"{placement}")
         print()
         print(f"First (or all available, if more were requested) {num_to_print} permutations with "
-              f"{num_maximum_allowed_matches} or less matches in all rotations")
+              f"less than {num_matches_for_funded} matches for all rotations (you don't get funded))")
         for i in range(num_to_print):
             print(seat_perms[i])
     else:
-        print("No permutations exist for those conditions!")
+        print("No permutations exist for those conditions (always funded)!")
 
 
 def validate_user_input(val, extra_check):
@@ -160,7 +154,7 @@ def validate_user_input(val, extra_check):
     '''
     try:
         val = int(val)
-        if val <= 0:
+        if val < 0:
             return False
         if extra_check == None:
             return True;
@@ -204,11 +198,11 @@ def main():
 
     num_seats = get_user_input("Enter the number of seats", None)
     num_starting_matches = get_user_input("Enter the number of starting matches", num_seats)
-    num_maximum_allowed_matches = get_user_input("Enter the maximum number of allowed matches via rotation", num_seats)
+    num_matches_for_funded = get_user_input("Enter the minimum number of matches required to get funded", num_seats)
     maximum_num_perms_to_print = get_user_input("Enter the maximum number of results to display", None)
 
-    seat_perms = get_seat_perms(num_seats, num_starting_matches, num_maximum_allowed_matches)
-    print_perms(seat_perms, num_maximum_allowed_matches, maximum_num_perms_to_print)
+    seat_perms = get_seat_perms(num_seats, num_starting_matches, num_matches_for_funded)
+    print_perms(seat_perms, num_matches_for_funded, maximum_num_perms_to_print)
 
 
 if __name__ == "__main__":
