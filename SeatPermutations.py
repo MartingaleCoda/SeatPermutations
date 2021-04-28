@@ -18,10 +18,14 @@ def get_seat_perms(num_seats, num_starting_matches, num_matches_for_funded):
         Number of matches required to be funded.
     '''
     placement = list(range(1, num_seats + 1))
-    unlocked_seat_perms = list(permutations(range(num_starting_matches + 1, num_seats + 1)))
-    seat_perms_as_lists = get_seat_perms_as_lists(unlocked_seat_perms, num_starting_matches)
-    seat_perms_x_match = get_seat_perms_x_match(placement, seat_perms_as_lists, num_starting_matches)
-    successes = get_successes(placement, seat_perms_x_match, num_matches_for_funded)
+    unlocked_seat_perms = list(permutations(
+        range(num_starting_matches + 1, num_seats + 1)))
+    seat_perms_as_lists = get_seat_perms_as_lists(
+        unlocked_seat_perms, num_starting_matches)
+    seat_perms_x_match = get_seat_perms_x_match(
+        placement, seat_perms_as_lists, num_starting_matches)
+    successes = get_successes(
+        placement, seat_perms_x_match, num_matches_for_funded)
 
     return successes
 
@@ -157,7 +161,7 @@ def validate_user_input(val, extra_check):
         if val < 0:
             return False
         if extra_check == None:
-            return True;
+            return True
         else:
             if val <= extra_check:
                 return True
@@ -183,25 +187,30 @@ def get_user_input(msg, extra_check):
     '''
     valid = False
     while not valid:
-        print(msg, end = ": ")
+        print(msg, end=": ")
         user_input = input()
         valid = validate_user_input(user_input, extra_check)
         if not valid:
             if extra_check == None:
                 print("Invalid input. Please enter a positive integer.")
             else:
-                print(f"Invalid input. Please enter a positive integer less than or equal to {extra_check}")
+                print(
+                    f"Invalid input. Please enter a positive integer less than or equal to {extra_check}")
     return int(user_input)
 
 
 def main():
 
     num_seats = get_user_input("Enter the number of seats", None)
-    num_starting_matches = get_user_input("Enter the number of starting matches", num_seats)
-    num_matches_for_funded = get_user_input("Enter the minimum number of matches required to get funded", num_seats)
-    maximum_num_perms_to_print = get_user_input("Enter the maximum number of results to display", None)
+    num_starting_matches = get_user_input(
+        "Enter the number of starting matches", num_seats)
+    num_matches_for_funded = get_user_input(
+        "Enter the minimum number of matches required to get funded", num_seats)
+    maximum_num_perms_to_print = get_user_input(
+        "Enter the maximum number of results to display", None)
 
-    seat_perms = get_seat_perms(num_seats, num_starting_matches, num_matches_for_funded)
+    seat_perms = get_seat_perms(
+        num_seats, num_starting_matches, num_matches_for_funded)
     print_perms(seat_perms, num_matches_for_funded, maximum_num_perms_to_print)
 
 
